@@ -10,13 +10,15 @@ except ImportError:
 import struct
 
 class gpsData(object):
-    __slots__ = ["timestamp", "lat", "lon", "alt"]
+    __slots__ = ["timestamp", "lat", "lon", "alt", "utm_x", "utm_y"]
 
     def __init__(self):
         self.timestamp = 0.0
         self.lat = 0.0
         self.lon = 0.0
         self.alt = 0.0
+        self.utm_x = 0.0
+        self.utm_y = 0.0
 
     def encode(self):
         buf = BytesIO()
@@ -25,7 +27,7 @@ class gpsData(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">ffff", self.timestamp, self.lat, self.lon, self.alt))
+        buf.write(struct.pack(">ffffff", self.timestamp, self.lat, self.lon, self.alt, self.utm_x, self.utm_y))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -39,14 +41,14 @@ class gpsData(object):
 
     def _decode_one(buf):
         self = gpsData()
-        self.timestamp, self.lat, self.lon, self.alt = struct.unpack(">ffff", buf.read(16))
+        self.timestamp, self.lat, self.lon, self.alt, self.utm_x, self.utm_y = struct.unpack(">ffffff", buf.read(24))
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if gpsData in parents: return 0
-        tmphash = (0x51ea26a4abc04a35) & 0xffffffffffffffff
+        tmphash = (0xa30f84a9c2cb5440) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

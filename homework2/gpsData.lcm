@@ -6,4 +6,6 @@ struct gpsData
     float lat;
     float lon;
     float alt;
+    float utm_x;
+    float utm_y;
 }
