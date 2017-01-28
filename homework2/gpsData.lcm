@@ -1,0 +1,9 @@
+package exlcm;
+
+struct gpsData
+{
+    float timestamp;
+    float lat;
+    float lon;
+    float alt;
+}
