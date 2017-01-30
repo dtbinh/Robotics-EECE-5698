@@ -2,9 +2,11 @@ package exlcm;
 
 struct gpsData
 {
-    float timestamp;
+    int64_t  timestamp;
     float lat;
+    string latDir;
     float lon;
+    string lonDir;
     float alt;
     float utm_x;
     float utm_y;

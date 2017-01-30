@@ -10,12 +10,14 @@ except ImportError:
 import struct
 
 class gpsData(object):
-    __slots__ = ["timestamp", "lat", "lon", "alt", "utm_x", "utm_y"]
+    __slots__ = ["timestamp", "lat", "latDir", "lon", "lonDir", "alt", "utm_x", "utm_y"]
 
     def __init__(self):
-        self.timestamp = 0.0
+        self.timestamp = 0
         self.lat = 0.0
+        self.latDir = ""
         self.lon = 0.0
+        self.lonDir = ""
         self.alt = 0.0
         self.utm_x = 0.0
         self.utm_y = 0.0
@@ -27,7 +29,17 @@ class gpsData(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">ffffff", self.timestamp, self.lat, self.lon, self.alt, self.utm_x, self.utm_y))
+        buf.write(struct.pack(">qf", self.timestamp, self.lat))
+        __latDir_encoded = self.latDir.encode('utf-8')
+        buf.write(struct.pack('>I', len(__latDir_encoded)+1))
+        buf.write(__latDir_encoded)
+        buf.write(b"\0")
+        buf.write(struct.pack(">f", self.lon))
+        __lonDir_encoded = self.lonDir.encode('utf-8')
+        buf.write(struct.pack('>I', len(__lonDir_encoded)+1))
+        buf.write(__lonDir_encoded)
+        buf.write(b"\0")
+        buf.write(struct.pack(">fff", self.alt, self.utm_x, self.utm_y))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -41,14 +53,20 @@ class gpsData(object):
 
     def _decode_one(buf):
         self = gpsData()
-        self.timestamp, self.lat, self.lon, self.alt, self.utm_x, self.utm_y = struct.unpack(">ffffff", buf.read(24))
+        self.timestamp, self.lat = struct.unpack(">qf", buf.read(12))
+        __latDir_len = struct.unpack('>I', buf.read(4))[0]
+        self.latDir = buf.read(__latDir_len)[:-1].decode('utf-8', 'replace')
+        self.lon = struct.unpack(">f", buf.read(4))[0]
+        __lonDir_len = struct.unpack('>I', buf.read(4))[0]
+        self.lonDir = buf.read(__lonDir_len)[:-1].decode('utf-8', 'replace')
+        self.alt, self.utm_x, self.utm_y = struct.unpack(">fff", buf.read(12))
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if gpsData in parents: return 0
-        tmphash = (0xa30f84a9c2cb5440) & 0xffffffffffffffff
+        tmphash = (0x68be2ac79e87db4d) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)
