@@ -1,0 +1,14 @@
+<launch>
+    <param name="global_param" value="someGlobalValue" />
+    <group ns="foo">
+        <param name="to_delete" value="Delete Me" />
+        <group ns="someGroup">
+            <param name="P" value="1.0" />
+            <param name="I" value="2.0" />
+            <param name="D" value="3.0" />
+        </group>
+    <node pkg="learning_tf" type="paramNode.py" name="paramNode" output="screen">
+    <param name="topic_name" value="chatter" />
+    </node>
+    </group>
+</launch>
