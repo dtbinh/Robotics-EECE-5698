@@ -1,0 +1,6 @@
+package exlcm;
+
+struct imuData
+{
+    float MagX;
+}

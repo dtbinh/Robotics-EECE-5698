@@ -12,8 +12,12 @@ if [ $? != 0 ] ; then
     fi
 fi
 
-lcm-gen -j lcmTypes/*.lcm
+cd lcmTypes
+lcm-gen -j *.lcm
 
 javac -cp $LCM_JAR exlcm/*.java
 
 jar cf my_types.jar exlcm/*.class
+
+cd ..
+lcm-gen -p lcmTypes/*.lcm
