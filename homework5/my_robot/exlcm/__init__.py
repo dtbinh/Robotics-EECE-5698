@@ -5,3 +5,5 @@ DO NOT MODIFY BY HAND!!!!
 
 from .gpsData import gpsData
 from .imuData import imuData
+from .gps import gps
+from .ins import ins

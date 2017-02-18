@@ -1,0 +1,12 @@
+package exlcm;
+
+struct gps
+{
+    float    timestamp;
+    float    lat;
+    float    longi;
+    int64_t  utmX;
+    int64_t  utmY;
+    float    alt;
+    int16_t  fixQ;
+}
