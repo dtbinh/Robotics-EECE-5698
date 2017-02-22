@@ -1,7 +1,7 @@
 
 % Let’s assume the logging file is lcm-l.02 in the dir below
 % open log file for reading
-log_file = lcm.logging.Log('/home/alexa/work/Robotics-EECE-5698/homework5/my_robot/logFiles/lcm-log-2017-02-19-12:11:42', 'r'); 
+log_file = lcm.logging.Log('/home/alexa/work/Robotics-EECE-5698/homework5/my_robot/logFiles/lcm-log-2017-02-20-18-13-49', 'r'); 
 magX = [];
 magY = [];
 accX = [];
@@ -33,10 +33,6 @@ while true
      break;
  end
   plot(magX, magY)
-  subplot(2, 1, 1)
-  plot(accX)
-  title('Accel X')
-  subplot(2, 1, 2)
-  title('Accel Y')
-  plot(accY)
+  sub
+  
 end

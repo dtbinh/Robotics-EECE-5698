@@ -9,6 +9,8 @@ magX = [];
 magY = [];
 gyroZ = [];
 yawRate = [];
+accX = [];
+accY = [];
 while true
  try
    ev = log_file.readNext();
@@ -27,7 +29,9 @@ while true
       end
       magXFul(end+1) = ins_package.MagX;
       magYFul(end+1) = ins_package.MagY;
-      gyroZ(end+1) = ins_package.GyroZ;;
+      gyroZ(end+1) = ins_package.GyroZ;
+      accX(end+1) = ins_package.AccelX;    
+      accY(end+1) = ins_package.AccelY;
       yawRate(end+1) = ins_package.Yaw;
       counter = counter + 1;
       
@@ -134,6 +138,35 @@ end
  figure(6)
  
  plot(yaw2)
+ 
+ 
+ % Part 2
+ vel = [ ];
+ %time = 0:1/fs:length(accX)*(1/40);
+ %time(1)=[];
+ accX = accX - mean(accX);
+ for i = 2:length(tspan)
+    vel(i) = trapz(tspan(1:i),accX(1:i));
+ end
+ 
+ vel = vel - min(vel);
+ 
+figure(7)
+subplot(4,1,1)
+plot(accX)
+subplot(4,1,2)
+% plots velocity of X
+plot(vel)
+
+subplot(4,1,3)
+plot(accY)
+
+subplot(4,1,4)
+result = yaw.*vel;
+plot(result);
+
+
+ 
 
  
  
