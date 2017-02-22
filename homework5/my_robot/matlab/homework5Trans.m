@@ -7,6 +7,7 @@ magXFul = [];
 magYFul = [];
 magX = [];
 magY = [];
+gyroZ = [];
 yawRate = [];
 while true
  try
@@ -26,6 +27,8 @@ while true
       end
       magXFul(end+1) = ins_package.MagX;
       magYFul(end+1) = ins_package.MagY;
+      gyroZ(end+1) = ins_package.GyroZ;;
+      yawRate(end+1) = ins_package.Yaw;
       counter = counter + 1;
       
      
@@ -106,6 +109,32 @@ end
  figure(3)
  plot(yaw)
  
+ % Butter method (doesn't work)
+ figure(4)
+ fc = .5;
+ fs = 40;
+ [b,a] = butter(1, fc/(fs/2));
+ dataIn = gyroZ;
+ dataOut = filter(b,a,dataIn);
+ 
+ plot(dataOut)
+ hold on
+ % ode method
+ 
+ tspan = [0:(1/fs): (1/fs)*length(gyroZ)];
+ tspan(1) = [];
+ [t,y] = ode23(@(t,y) dirYaw(t, gyroZ, fs)*180/pi, tspan, yawRate(1)-180);
+ y = mod(y,360) -180;
+ figure(5)
+ plot(t,y)
+ 
+ 
+ % complemntary filter
+ yaw2 = 0.98.*yaw'+ 0.02.*y;
+ figure(6)
+ 
+ plot(yaw2)
+
  
  
    
