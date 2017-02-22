@@ -1,0 +1,70 @@
+% Let’s assume the logging file is lcm-l.02 in the dir below
+% open log file for reading
+log_file = lcm.logging.Log('/home/alexa/work/Robotics-EECE-5698/homework5/my_robot/logFiles/lcm-log-2017-02-20-18-13-49', 'r'); 
+counter = 0;
+magX = [];
+magY = [];
+while true
+ try
+   ev = log_file.readNext();
+   
+   % channel name is in ev.channel
+   % there may be multiple channels but in this case you are only interested in RDI channel
+   if strcmp(ev.channel, 'INS_MODULE')
+ 
+     % build rdi object from data in this record
+      ins_package = exlcm.ins(ev.data);
+
+      % read in utm data
+      if counter > 1350 && counter < 4020
+        magX(end+1) = ins_package.MagX;
+        magY(end+1) = ins_package.MagY;
+      end
+      counter = counter + 1;
+      
+      if counter > 4020
+          break;
+      end
+      
+    end
+  catch err   % exception will be thrown when you hit end of file
+     break;
+ end
+end
+
+ % Hard iron correction
+ alpha = (max(magX) + min(magX))/2;
+ beta = (max(magY) + min(magY))/2;
+ 
+ figure(1)
+ plot(magX,magY)
+ hold on
+ plot(alpha,beta, 'r*')
+ hold on
+ magX2 = magX - alpha;
+ plot(magX2, magY2)
+ magY2 = magY - beta; 
+ % center of corrected hard iron
+ alpha2 = (max(magX2) + min(magX2))/2;
+ beta2 = (max(magY2) + min(magY2))/2;
+ hold on
+ plot(alpha2, beta2, 'r*')
+ 
+ % Soft Iron Correction
+ %figure(2)
+ hold on
+ radius = sqrt(magX2.^2 + magY2.^2);
+ maxRadius = max(radius);
+ corrMax = find(radius == maxRadius); 
+ theta = asin(magY2(corrMax)/maxRadius);
+ 
+ R = [ cos(theta) sin(theta); -sin(theta) cos(theta) ];
+ 
+ for
+ v1 = R.*[magX2; magY2];
+
+ 
+ hold on
+ plot(v1(1),v2(2));
+   
+ 
