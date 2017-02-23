@@ -8,7 +8,7 @@ magYFul = [];
 magX = [];
 magY = [];
 gyroZ = [];
-yawRate = [];
+yawSensor = [];
 accX = [];
 accY = [];
 utmx = [];
@@ -42,7 +42,7 @@ while true
       gyroZ(end+1) = ins_package.GyroZ;
       accX(end+1) = ins_package.AccelX;    
       accY(end+1) = ins_package.AccelY;
-      yawRate(end+1) = ins_package.Yaw;
+      yawSensor(end+1) = ins_package.Yaw;
       counter = counter + 1;
       
      
@@ -139,7 +139,7 @@ end
  
  tspan = [0:(1/fs): (1/fs)*length(gyroZ)];
  tspan(1) = [];
- [t,y] = ode23(@(t,y) dirYaw(t, gyroZ, fs)*180/pi, tspan, yawRate(1)-180);
+ [t,y] = ode23(@(t,y) dirYaw(t, gyroZ, fs)*180/pi, tspan, yawSensor(1)-180);
  y = mod(y,360) -180;
  title('Integrated yaw')
  
@@ -195,9 +195,10 @@ ve = [];
 vn = [];
 dispx = [ ];
 dispy = [ ];
+offset = yaw(1)*180/pi - yawSensor(1);
 for i=1:length(vel)
-    ve(i) = vel(i)*cos(yawRate(i)*pi/180);
-    vn(i) = vel(i)*sin(yawRate(i)*pi/180);
+    ve(i) = vel(i)*-cos((yawSensor(i)+offset)*pi/180);
+    vn(i) = vel(i)*-sin((yawSensor(i)+offset)*pi/180);
 end
 
 for i = 2:length(tspan)
@@ -207,12 +208,25 @@ for i = 2:length(tspan)
 
 
 figure(8)
-subplot(2,1,1)
+subplot(2,1,2)
 plot(dispx, dispy)
 title('Displacment calculated')
-subplot(2,1,2)
+subplot(2,1,1)
 plot(utmx,utmy)
 title('utmx vs utmy');
+
+diffGyroZ = diff(gyroZ)/(1/fs);
+for i = 2:length(accY)
+    xc(i) = (accY(i) - (vel(i) * gyroZ(i)))/ diffGyroZ(i - 1);
+end
+
+figure(9)
+subplot(2, 1, 1)
+histogram(xc)
+title('The Xc error')
+subplot(2, 1, 2)
+plot(utmx, utmy)
+title('Utmx vs utmy')
 
 
 
