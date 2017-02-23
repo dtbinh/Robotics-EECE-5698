@@ -11,9 +11,19 @@ gyroZ = [];
 yawRate = [];
 accX = [];
 accY = [];
+utmx = [];
+utmy = [];
 while true
  try
    ev = log_file.readNext();
+   
+   if strcmp(ev.channel, 'GPS_MODULE')
+       
+        gps_package = exlcm.gps(ev.data);
+        utmx(end+1) = gps_package.utmX;
+        utmy(end+1) = gps_package.utmY;       
+        
+   end
    
    % channel name is in ev.channel
    % there may be multiple channels but in this case you are only interested in RDI channel
@@ -87,6 +97,7 @@ end
  
  % Plot the scaled magneometer
  plot(xCor, v1(2,:))
+ title('Calibrating magnetometer')
  
  % applied on full data
  figure(2)
@@ -110,8 +121,10 @@ end
  % Plot the scaled magneometer
  plot(xCor2, v12(2,:))
  yaw = atan2(-v12(2,:),xCor2);
+ 
  figure(3)
- plot(yaw)
+ plot(yaw) 
+ title('Data using calibrated magnetometer')
  
  % Butter method (doesn't work)
  figure(4)
@@ -129,6 +142,8 @@ end
  tspan(1) = [];
  [t,y] = ode23(@(t,y) dirYaw(t, gyroZ, fs)*180/pi, tspan, yawRate(1)-180);
  y = mod(y,360) -180;
+ title(
+ 
  figure(5)
  plot(t,y)
  
@@ -152,19 +167,51 @@ end
  vel = vel - min(vel);
  
 figure(7)
-subplot(3,1,1)
+subplot(4,1,1)
+
 plot(accX)
-subplot(3,1,2)
+title('accel x');
+subplot(4,1,2)
+
 % plots velocity of X
 plot(vel)
+title('velocity');
 
-subplot(3,1,3)
-result = yaw*vel
-plot(yaw*vel');
+subplot(4,1,3)
 
-% Plot y
-figure(8)
 plot(accY)
+title('accel Y');
+
+subplot(4,1,4)
+result = yaw.*vel;
+plot(result);
+title('accel Y calculate')
+
+% Part b
+ve = [];
+vn = [];
+dispx = [ ];
+dispy = [ ];
+for i=1:length(vel)
+    ve(i) = vel(i)*cos(yawRate(i)*pi/180);
+    vn(i) = vel(i)*sin(yawRate(i)*pi/180);
+end
+
+for i = 2:length(tspan)
+    dispx(i) = trapz(tspan(1:i), ve(1:i));
+    dispy(i) = trapz(tspan(1:i), vn(1:i));
+ end
+
+
+figure(8)
+subplot(2,1,1)
+plot(dispx, dispy)
+subplot(2,1,2)
+plot(utmx,utmy)
+title('utmx vs utmy');
+
+
+
  
 
  

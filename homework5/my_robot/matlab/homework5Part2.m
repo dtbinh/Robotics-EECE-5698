@@ -40,4 +40,4 @@ plot(y)
 
 % Plot y
 figure(2)
-plot(accY)X
+plot(accY)

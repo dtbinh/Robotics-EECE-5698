@@ -11,9 +11,19 @@ gyroZ = [];
 yawRate = [];
 accX = [];
 accY = [];
+utmx = [];
+utmy = [];
 while true
  try
    ev = log_file.readNext();
+   
+   if strcmp(ev.channel, 'GPS_MODULE')
+       
+        gps_package = exlcm.gps(ev.data);
+        utmx(end+1) = gps_package.utmX;
+        utmy(end+1) = gps_package.utmY;       
+        
+   end
    
    % channel name is in ev.channel
    % there may be multiple channels but in this case you are only interested in RDI channel
@@ -87,6 +97,7 @@ end
  
  % Plot the scaled magneometer
  plot(xCor, v1(2,:))
+ title('Calibrating magnetometer')
  
  % applied on full data
  figure(2)
@@ -109,9 +120,11 @@ end
  
  % Plot the scaled magneometer
  plot(xCor2, v12(2,:))
- yaw = atan2(-v12(2,:),xCor2);
+ yaw = atan2(-v12(2,:),xCor2); 
+ title('Data using calibrated magnetometer')
+ 
  figure(3)
- plot(yaw)
+ plot(yaw) 
  
  % Butter method (doesn't work)
  figure(4)
@@ -122,19 +135,23 @@ end
  dataOut = filter(b,a,dataIn);
  
  plot(dataOut)
- hold on
  % ode method
  
  tspan = [0:(1/fs): (1/fs)*length(gyroZ)];
  tspan(1) = [];
  [t,y] = ode23(@(t,y) dirYaw(t, gyroZ, fs)*180/pi, tspan, yawRate(1)-180);
  y = mod(y,360) -180;
+ title('Integrated yaw')
+ 
+ 
  figure(5)
  plot(t,y)
  
  
  % complemntary filter
  yaw2 = 0.98.*yaw'+ 0.02.*y;
+ title('filter complement')
+ 
  figure(6)
  
  plot(yaw2)
@@ -150,20 +167,53 @@ end
  end
  
  vel = vel - min(vel);
+ title('corrected yaw')
  
 figure(7)
 subplot(4,1,1)
+
 plot(accX)
+title('accel x');
 subplot(4,1,2)
+
 % plots velocity of X
 plot(vel)
+title('velocity');
 
 subplot(4,1,3)
+
 plot(accY)
+title('accel Y');
 
 subplot(4,1,4)
 result = yaw.*vel;
 plot(result);
+title('accel Y calculate')
+
+% Part b
+ve = [];
+vn = [];
+dispx = [ ];
+dispy = [ ];
+for i=1:length(vel)
+    ve(i) = vel(i)*cos(yawRate(i)*pi/180);
+    vn(i) = vel(i)*sin(yawRate(i)*pi/180);
+end
+
+for i = 2:length(tspan)
+    dispx(i) = trapz(tspan(1:i), ve(1:i));
+    dispy(i) = trapz(tspan(1:i), vn(1:i));
+ end
+
+
+figure(8)
+subplot(2,1,1)
+plot(dispx, dispy)
+title('Displacment calculated')
+subplot(2,1,2)
+plot(utmx,utmy)
+title('utmx vs utmy');
+
 
 
  
