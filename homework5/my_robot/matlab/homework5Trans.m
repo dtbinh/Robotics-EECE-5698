@@ -121,10 +121,11 @@ end
  % Plot the scaled magneometer
  plot(xCor2, v12(2,:))
  yaw = atan2(-v12(2,:),xCor2); 
- title('Data using calibrated magnetometer')
  
  figure(3)
- plot(yaw) 
+ plot(yaw)  
+ title('Data using calibrated magnetometer')
+ 
  
  % Butter method (doesn't work)
  figure(4)
@@ -141,21 +142,22 @@ end
  tspan(1) = [];
  [t,y] = ode23(@(t,y) dirYaw(t, gyroZ, fs)*180/pi, tspan, yawSensor(1)-180);
  y = mod(y,360) -180;
- title('Integrated yaw')
  
  
  figure(5)
  plot(t,y)
  
+ title('Integrated yaw')
+ 
  
  % complemntary filter
  yaw2 = 0.98.*yaw'+ 0.02.*y;
- title('filter complement')
  
  figure(6)
  
  plot(yaw2)
  
+ title('filter complement')
  
  % Part 2
  vel = [ ];
