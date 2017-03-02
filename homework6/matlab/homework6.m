@@ -61,6 +61,7 @@ for n = 2:numImages
     % Compute T(1) * ... * T(n-1) * T(n)
     tforms(n).T = tforms(n-1).T * tforms(n).T
 end
+full_tforms = tforms;
 
 %% Output Limits
 
@@ -140,6 +141,3 @@ figure
 imshow(panorama)
 
 %% Calculate Camera Position
-
-
-[rotationMatrix, translationVector] = extrinsics(imagePoints, worldPoints, cameraParams)
