@@ -22,7 +22,6 @@ I = readimage(buildingScene, 1);
 % Initialize features for I(1)
 grayImage = rgb2gray(I);
 [y,x,m] = harris(grayImage, 1000, 'tile', [2 2], 'disp');
-%[y,x,features] = harris(I, 1000, 'tile', [3 3], 'disp');
 [features, points] = extractFeatures(grayImage,[x y]);
 
 % Initialize all the transforms to the identity matrix. Note that the
@@ -45,7 +44,6 @@ for n = 2:numImages
     % Detect and extract SURF features for I(n).
     grayImage = rgb2gray(I);
     [y,x,m] = harris(grayImage, 1000, 'tile', [2 2], 'disp');
-    %[y,x,features] = harris(I, 1000, 'tile', [3 3], 'disp');
     [features, points] = extractFeatures(grayImage,[x y]);
     
     % Find correspondences between I(n) and I(n-1).
@@ -57,9 +55,11 @@ for n = 2:numImages
     % Estimate the transformation between I(n) and I(n-1).
     tforms(n) = estimateGeometricTransform(matchedPoints, matchedPointsPrev,...
         'projective', 'Confidence', 99.9, 'MaxNumTrials', 2000);
+    
+    
 
     % Compute T(1) * ... * T(n-1) * T(n)
-    tforms(n).T = tforms(n-1).T * tforms(n).T;
+    tforms(n).T = tforms(n-1).T * tforms(n).T
 end
 
 %% Output Limits
@@ -138,3 +138,8 @@ end
 
 figure
 imshow(panorama)
+
+%% Calculate Camera Position
+
+
+[rotationMatrix, translationVector] = extrinsics(imagePoints, worldPoints, cameraParams)
