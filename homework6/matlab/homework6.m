@@ -59,7 +59,7 @@ for n = 2:numImages
     
 
     % Compute T(1) * ... * T(n-1) * T(n)
-    tforms(n).T = tforms(n-1).T * tforms(n).T
+    tforms(n).T = tforms(n-1).T * tforms(n).T;
 end
 full_tforms = tforms;
 
@@ -122,14 +122,28 @@ xLimits = [xMin xMax];
 yLimits = [yMin yMax];
 panoramaView = imref2d([height width], xLimits, yLimits);
 
+radius = 100;
 % Create the panorama.
 for i = 1:numImages
+    
+    disp(['Creating panorama ' num2str(i) ' of '...
+        num2str(numImages)]);
 
     I = readimage(buildingScene, i);
 
     % Transform I into the panorama.
     warpedImage = imwarp(I, tforms(i), 'OutputView', panoramaView);
 
+    if i==centerIdx % Loop must be stopped on center image.
+        BW = imbinarize(warpedImage(:,:,1),0);
+        BW = imfill(BW,'holes');
+        s = regionprops(BW,'centroid');
+        centroids = cat(1, s.Centroid);
+        
+        offsetx = centroids(1,1);
+        offsety = centroids(1,2); 
+    end
+    
     % Generate a binary mask.
     mask = imwarp(true(size(I,1),size(I,2)), tforms(i), 'OutputView', panoramaView);
 
@@ -140,4 +154,21 @@ end
 figure
 imshow(panorama)
 
-%% Calculate Camera Position
+
+%% Camera locations
+cam_loc = panorama;
+disp(['offset X = ' num2str(offsetx)]);
+disp(['offset Y = ' num2str(offsety)]);
+
+for i=1:numImages
+    disp(['Camera Location in panorama ' num2str(i) ' of '...
+        num2str(numImages)]);
+    
+    cam_loc = insertShape(cam_loc,'FilledCircle',...
+        [tforms(i).T(3,1)+offsetx tforms(i).T(3,2)+offsety...
+        radius],'Color', 'red','Opacity',0.9);
+    
+end
+h = figure; imshow(cam_loc);
+savefig(h,'cam_loc_wall.fig');
+saveas(h,'cam_loc_wall.png');
